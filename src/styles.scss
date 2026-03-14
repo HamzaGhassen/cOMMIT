@@ -1,0 +1,253 @@
+/* You can add global styles to this file, and also import other style files */
+@import "../node_modules/primeng/resources/primeng.min.css";
+@import "../node_modules/primeflex/primeflex.scss";
+@import "../node_modules/primeicons/primeicons.css";
+@import "../node_modules/prismjs/themes/prism-coy.css";
+@import "assets/sass/layout/_variables";
+@import "assets/sass/layout/_layout";
+@import "assets/sass/overrides/_overrides";
+
+small{
+    color: red;
+}
+
+
+.product-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.status-instock {
+        background: #C8E6C9;
+        color: #256029;
+    }
+
+    &.status-outofstock {
+        background: #FFCDD2;
+        color: #C63737;
+    }
+
+    &.status-lowstock {
+        background: #FEEDAF;
+        color: #8A5340;
+    }
+}
+
+.customer-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.status-qualified {
+        background: #C8E6C9;
+        color: #256029;
+    }
+
+    &.status-unqualified {
+        background: #FFCDD2;
+        color: #C63737;
+    }
+
+    &.status-negotiation {
+        background: #FEEDAF;
+        color: #8A5340;
+    }
+
+    &.status-new {
+        background: #B3E5FC;
+        color: #23547B;
+    }
+
+    &.status-renewal {
+        background: #ECCFFF;
+        color: #694382;
+    }
+
+    &.status-proposal {
+        background: #FFD8B2;
+        color: #805B36;
+    }
+}
+
+.order-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.order-delivered {
+        background: #C8E6C9;
+        color: #256029;
+    }
+
+    &.order-cancelled {
+        background: #FFCDD2;
+        color: #C63737;
+    }
+
+    &.order-pending {
+        background: #FEEDAF;
+        color: #8A5340;
+    }
+
+    &.order-returned {
+        background: #ECCFFF;
+        color: #694382;
+    }
+}
+
+/* ==========================================================================
+   Toasts (PrimeNG) - plus lisibles (fond + couleurs)
+   ========================================================================== */
+
+.p-toast .p-toast-message {
+    border-radius: 14px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+    backdrop-filter: blur(6px);
+}
+
+.p-toast .p-toast-message .p-toast-message-content {
+    padding: 14px 16px;
+}
+
+.p-toast .p-toast-message .p-toast-summary {
+    font-weight: 800;
+    font-size: 1.05rem;
+}
+
+.p-toast .p-toast-message .p-toast-detail {
+    margin-top: 4px;
+    font-size: 0.98rem;
+    line-height: 1.25rem;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+    background: rgba(16, 185, 129, 0.14);
+    border-left: 8px solid #10b981;
+    color: #064e3b;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+    background: rgba(239, 68, 68, 0.14);
+    border-left: 8px solid #ef4444;
+    color: #7f1d1d;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn {
+    background: rgba(245, 158, 11, 0.16);
+    border-left: 8px solid #f59e0b;
+    color: #78350f;
+}
+
+.p-toast .p-toast-message.p-toast-message-info {
+    background: rgba(59, 130, 246, 0.14);
+    border-left: 8px solid #3b82f6;
+    color: #1e3a8a;
+}
+
+/* Smooth transitions for layout */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Ensure proper box sizing */
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+/* ==========================================================================
+   PrimeNG Overrides - Dropdowns & Panels (Fixing transparency)
+   ========================================================================== */
+
+.p-dropdown-panel, .p-multiselect-panel {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden !important;
+    margin-top: 4px !important;
+    animation: fadeIn 0.2s ease-out !important;
+
+    .p-dropdown-items, .p-multiselect-items {
+        padding: 0.5rem 0 !important;
+        background: white !important;
+
+        .p-dropdown-item, .p-multiselect-item {
+            margin: 2px 8px !important;
+            padding: 0.75rem 1rem !important;
+            border-radius: 8px !important;
+            color: #374151 !important;
+            font-weight: 500 !important;
+            transition: all 0.2s ease !important;
+            background: transparent !important;
+
+            &:hover {
+                background: #f3f4f6 !important;
+                color: #2563eb !important;
+                padding-left: 1.25rem !important;
+            }
+
+            &.p-highlight {
+                background: #eff6ff !important;
+                color: #2563eb !important;
+                font-weight: 700 !important;
+            }
+        }
+    }
+
+    .p-dropdown-filter-container, .p-multiselect-filter-container {
+        padding: 0.75rem !important;
+        background: #f9fafb !important;
+        border-bottom: 1px solid #e5e7eb !important;
+
+        .p-dropdown-filter, .p-multiselect-filter {
+            padding: 0.5rem 0.75rem !important;
+            border-radius: 8px !important;
+            border: 1px solid #d1d5db !important;
+            font-size: 0.9rem !important;
+
+            &:focus {
+                border-color: #3b82f6 !important;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+            }
+        }
+    }
+
+    .p-multiselect-header {
+        background: #f9fafb !important;
+        padding: 0.75rem !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        
+        .p-checkbox {
+            margin-right: 0.75rem !important;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ensure body margins and overflow are correct */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: #f8fafc;
+}

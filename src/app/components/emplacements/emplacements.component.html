@@ -1,0 +1,531 @@
+<p-toast></p-toast>
+
+<div class="page-container">
+
+  <!-- Mode liste des épis -->
+  <div *ngIf="view === 'list'">
+
+    <!-- En-tête -->
+    <div class="header">
+      <h1>Gestion des Emplacements</h1>
+      <div class="header-actions">
+        <button class="download-template-btn" (click)="downloadTemplate()" title="Télécharger le fichier modèle Excel">
+          <span class="btn-icon">&#x1F4E5;</span>
+          Télécharger le modèle
+        </button>
+        <button class="add-epi-btn" (click)="openAddChoice()">
+          <span class="btn-icon">+</span>
+          Ajouter un épi
+        </button>
+      </div>
+    </div>
+
+    <!-- Chargement -->
+    <div class="loading-container" *ngIf="loading">
+      <p-progressBar mode="indeterminate" [style]="{'height': '6px'}"></p-progressBar>
+      <p>Chargement des emplacements...</p>
+    </div>
+
+    <!-- Grille des épis -->
+    <div class="epis-grid" *ngIf="!loading">
+      <div class="epi-card"
+           *ngFor="let epie of epies"
+           (click)="openEpie(epie)">
+
+        <div class="epi-top">
+          <div class="epi-icon">&#x1F4DA;</div>
+          <div class="epi-title-group">
+            <h3>{{ epie.numero }}</h3>
+            <div class="epi-code">{{ epie.type }}</div>
+          </div>
+        </div>
+
+        <div class="epi-details">
+          <span class="detail-badge" *ngIf="epie.metrage">
+            <span class="detail-icon">&#x1F4CF;</span>
+            {{ epie.metrage }} ml
+          </span>
+          <span class="detail-badge">
+            <span class="detail-icon">&#x1F4E6;</span>
+            {{ epie.type }}
+          </span>
+        </div>
+
+        <div class="epi-bottom">
+          <span>Cliquez pour ouvrir</span>
+          <div class="card-actions">
+            <button class="edit-btn" (click)="openEditEpiModal(epie, $event)" title="Modifier">&#x270F;&#xFE0F;</button>
+            <button class="delete-btn" (click)="deleteEpi(epie, $event)" title="Supprimer">&#x1F5D1;&#xFE0F;</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- État vide -->
+    <div class="empty-state" *ngIf="!loading && epies.length === 0">
+      <p>Aucun épi disponible</p>
+      <button class="add-epi-btn empty-btn" (click)="openAddChoice()">
+        Créer votre premier épi
+      </button>
+    </div>
+
+  </div>
+
+
+  <!-- Mode matrice -->
+  <div *ngIf="view === 'matrix' && selectedEpie">
+
+    <!-- En-tête de la matrice -->
+    <div class="detail-header">
+      <button class="back-btn" (click)="back()">&#x2190; Retour</button>
+
+      <div class="title-group">
+        <h1>{{ selectedEpie.numero }}</h1>
+        <p class="subtitle">
+          {{ rows }} tablettes &times; {{ cols }} travers
+          <span *ngIf="selectedEpie.metrage"> &bull; {{ selectedEpie.metrage }} ml</span>
+        </p>
+      </div>
+
+      <div class="fill-rate">{{ fillPercentage }}%</div>
+    </div>
+
+    <!-- Chargement de la matrice -->
+    <div class="loading-container" *ngIf="loadingMatrix">
+      <p-progressBar mode="indeterminate" [style]="{'height': '6px'}"></p-progressBar>
+      <p>Chargement de la matrice...</p>
+    </div>
+
+    <!-- Contrôles de la matrice -->
+    <div class="matrix-controls" *ngIf="!loadingMatrix">
+      <div class="controls-group">
+        <span class="controls-label">Tablettes (lignes):</span>
+        <button class="control-btn" (click)="addRow()" [disabled]="rows >= 50">+ Ajouter</button>
+        <button class="control-btn" (click)="removeLastRow()" [disabled]="rows <= 1">- Supprimer</button>
+        <span class="dimension-badge">{{ rows }}</span>
+      </div>
+      <div class="controls-group">
+        <span class="controls-label">Travers (colonnes):</span>
+        <button class="control-btn" (click)="addColumn()" [disabled]="cols >= 50">+ Ajouter</button>
+        <button class="control-btn" (click)="removeLastColumn()" [disabled]="cols <= 1">- Supprimer</button>
+        <span class="dimension-badge">{{ cols }}</span>
+      </div>
+      <button class="resize-btn" (click)="openResizeModal()">Redimensionner</button>
+    </div>
+
+    <!-- Tableau matriciel -->
+    <div class="matrix-container" *ngIf="!loadingMatrix">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th class="row-header">#</th>
+            <th *ngFor="let travers of traversChildren; let i = index" class="travers-th">
+              <div class="travers-header-content" [class.multi-selected]="selectedTraversIds.has(i)">
+                <div class="select-checkbox" (click)="toggleTraversSelection(i, $event)">
+                  <span *ngIf="selectedTraversIds.has(i)">&#x2715;</span>
+                </div>
+                <span class="travers-numero-text">{{ travers.numero || (i + 1) }}</span>
+                <div class="travers-hover-actions">
+                  <button class="travers-action-btn travers-edit-btn"
+                          (click)="openEditTraversModal(travers, i, $event)"
+                          title="Modifier">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button class="travers-action-btn travers-delete-btn"
+                          (click)="deleteTravers(travers, i, $event)"
+                          title="Supprimer">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of matrix; let r = index">
+            <td class="row-header"
+                [class.selected]="selectedRowIndex === r"
+                (click)="selectRow(r)">
+              {{ r + 1 }}
+            </td>
+            <td *ngFor="let cell of row; let c = index" class="matrix-cell">
+
+              <!-- Tablette supprimée -->
+              <div class="tablette-cell tablette-deleted"
+                   *ngIf="cell.deleted"
+                   (click)="addTabletteBack(r, c)">
+                <span class="tablette-add-btn">+</span>
+                <span class="tablette-add-label">Ajouter</span>
+              </div>
+
+              <!-- Tablette active -->
+              <div class="tablette-cell tablette-active"
+                   *ngIf="!cell.deleted"
+                   draggable="true"
+                   (dragstart)="onTabletteDragStart(r, c, $event)"
+                   (dragover)="onTabletteDragOver(r, c, $event)"
+                   (dragleave)="onTabletteDragLeave(r, c, $event)"
+                   (drop)="onTabletteDrop(r, c, $event)"
+                   (dragend)="onTabletteDragEnd($event)"
+                   [class.drag-over-tablette]="cell.isDragOver"
+                   [class.dragging-tablette]="draggingCell?.r === r && draggingCell?.c === c"
+                   [class.multi-selected]="selectedTabletteKeys.has(r + '-' + c)"
+                   (click)="openTabletteDetail(cell)"
+                   [title]="cell.tabletteNumero || ('Tablette ' + (r+1))">
+
+                <div class="select-checkbox" (click)="toggleTabletteSelection(r, c, $event)">
+                  <span *ngIf="selectedTabletteKeys.has(r + '-' + c)">&#x2715;</span>
+                </div>
+
+                <span class="tablette-numero">{{ cell.tabletteNumero || ('TAB' + (r + 1)) }}</span>
+
+                <span class="bloc-count" *ngIf="cell.blocs && cell.blocs.length > 0">
+                  {{ cell.blocs.length }} bloc{{ cell.blocs.length > 1 ? 's' : '' }}
+                </span>
+
+                <!-- Actions au survol -->
+                <div class="tablette-hover-actions">
+                  <button class="tablette-action-btn tablette-edit-btn"
+                          (click)="openEditTabletteModal(cell, r, c, $event)"
+                          title="Modifier">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button class="tablette-action-btn tablette-delete-btn"
+                          (click)="deleteTablette(cell, r, c, $event)"
+                          title="Supprimer">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+
+              </div>
+
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Barre de suppression groupée -->
+    <div class="bulk-delete-bar" *ngIf="hasSelection">
+      <span class="bulk-delete-count">{{ selectionCount }} élément(s) sélectionné(s)</span>
+      <button class="bulk-delete-btn" (click)="bulkDelete()">
+        <i class="fa-solid fa-trash"></i> Supprimer la sélection
+      </button>
+      <button class="bulk-cancel-btn" (click)="clearSelection()">Annuler</button>
+    </div>
+
+  </div>
+
+
+  <!-- Modales -->
+
+  <!-- Modal : choix d'ajout -->
+  <div class="modal" *ngIf="showAddChoiceModal" (click)="closeAddChoice()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+      <h3>Ajouter un épi</h3>
+      <p class="modal-subtitle">Choisissez une methode de creation</p>
+      <div class="choice-buttons">
+        <button class="choice-btn" (click)="chooseImport()">
+          <span class="choice-icon">&#x1F4C4;</span>
+          <span class="choice-label">Importer un fichier Excel</span>
+          <span class="choice-desc">Importez vos donnees depuis un fichier .xlsx</span>
+        </button>
+        <button class="choice-btn" (click)="chooseManual()">
+          <span class="choice-icon">&#x270F;&#xFE0F;</span>
+          <span class="choice-label">Création manuelle</span>
+          <span class="choice-desc">Créez un épi en remplissant le formulaire</span>
+        </button>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeAddChoice()">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal : import Excel -->
+  <div class="modal" *ngIf="showImportModal" (click)="closeImportModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Importer un fichier Excel</h3>
+      <p class="modal-hint">Colonnes : <strong>numero</strong>, <strong>type</strong> (EPIE, TRAVERS, TABLETTE, BLOC), <strong>metrage</strong>, <strong>parent</strong>. Le métrage du parent doit être supérieur à celui de l'enfant (épi &gt; travers &gt; tablette &gt; bloc).</p>
+      <div class="form-group">
+        <label>Fichier Excel (.xlsx, .xls)</label>
+        <input type="file" accept=".xlsx,.xls" (change)="onFileSelect($event)" class="file-input">
+      </div>
+      <div class="file-info" *ngIf="importFile">
+        <span class="file-icon">&#x1F4C4;</span>
+        <span class="file-name">{{ importFile.name }}</span>
+        <span class="file-size">({{ (importFile.size / 1024).toFixed(1) }} Ko)</span>
+      </div>
+      <div class="loading-container" *ngIf="importing">
+        <p-progressBar mode="indeterminate" [style]="{'height': '6px'}"></p-progressBar>
+        <p>Import en cours...</p>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeImportModal()" [disabled]="importing">Annuler</button>
+        <button class="confirm-btn" [disabled]="!importFile || importing" (click)="submitImport()">Importer</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal : création d'épi -->
+  <div class="modal" *ngIf="showAddEpiModal" (click)="closeAddEpiModal()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+      <h3>Créer un nouvel épi</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre de travers *</label>
+          <input type="number" [(ngModel)]="newEpiTraversCount" min="1" max="50" class="number-input" autofocus>
+        </div>
+        <div class="form-group">
+          <label>Nombre de tablettes par travers *</label>
+          <input type="number" [(ngModel)]="newEpiTablettesPerTravers" min="1" max="9" class="number-input">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre de blocs par tablette *</label>
+          <input type="number" [(ngModel)]="newEpiBlocsPerTablette" min="1" max="8" class="number-input">
+          <small class="input-hint">Max 8 blocs par tablette</small>
+        </div>
+        <div class="form-group">
+          <label>Métrage par bloc (ml) *</label>
+          <input type="number" [(ngModel)]="newEpiMetragePerBloc" placeholder="ex: 12" class="number-input" min="0">
+        </div>
+      </div>
+      <div class="matrix-preview-lg" *ngIf="newEpiTablettesPerTravers > 0 && newEpiTraversCount > 0">
+        <div class="preview-header">
+          <span class="preview-title">Aperçu de la structure</span>
+          <span class="preview-dimensions">
+            {{ newEpiTablettesPerTravers }} tablettes &times; {{ newEpiTraversCount }} travers
+            &bull; {{ newEpiBlocsPerTablette || 0 }} blocs/tablette
+            &bull; {{ (newEpiTraversCount * newEpiTablettesPerTravers * (newEpiBlocsPerTablette || 0)) }} blocs au total
+          </span>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-grid-row" *ngFor="let r of [].constructor(Math.min(5, newEpiTablettesPerTravers))">
+            <div class="preview-grid-cell" *ngFor="let c of [].constructor(Math.min(8, newEpiTraversCount))"></div>
+          </div>
+          <div class="preview-more-info" *ngIf="newEpiTablettesPerTravers > 5 || newEpiTraversCount > 8">
+            <span>&#x22EE;</span>
+            <small>Matrice plus grande que l'aperçu</small>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeAddEpiModal()">Annuler</button>
+        <button class="confirm-btn"
+                [disabled]="!newEpiTraversCount || !newEpiTablettesPerTravers || !newEpiBlocsPerTablette || !newEpiMetragePerBloc || newEpiTraversCount < 1 || newEpiTablettesPerTravers < 1 || newEpiBlocsPerTablette < 1 || newEpiTablettesPerTravers > 9 || newEpiBlocsPerTablette > 8"
+                (click)="addEpi()">
+          Créer l'épi
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal : redimensionnement -->
+  <div class="modal" *ngIf="showResizeModal" (click)="closeResizeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Redimensionner la matrice</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre de tablettes (lignes)</label>
+          <input type="number" [(ngModel)]="tempRows" min="1" max="50" class="number-input">
+          <small class="input-hint">Valeur actuelle: {{ rows }}</small>
+        </div>
+        <div class="form-group">
+          <label>Nombre de travers (colonnes)</label>
+          <input type="number" [(ngModel)]="tempCols" min="1" max="50" class="number-input">
+          <small class="input-hint">Valeur actuelle: {{ cols }}</small>
+        </div>
+      </div>
+      <div class="warning-message" *ngIf="tempRows < rows || tempCols < cols">
+        Attention: La reduction de la matrice supprimera les cellules en exces
+      </div>
+      <div class="preview-info">
+        Nouvelle dimension: {{ tempRows }} &times; {{ tempCols }} = {{ tempRows * tempCols }} cellules
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeResizeModal()">Annuler</button>
+        <button class="confirm-btn"
+                [disabled]="tempRows < 1 || tempCols < 1 || tempRows > 50 || tempCols > 50"
+                (click)="applyResize()">
+          Appliquer
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal : modification d'épi -->
+  <div class="modal" *ngIf="showEditEpiModal" (click)="closeEditEpiModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Modifier l'épi</h3>
+      <div class="form-group">
+        <label>Numéro de l'épi</label>
+        <input type="text" [(ngModel)]="editEpiName" placeholder="ex: EPI-001..." autofocus>
+      </div>
+      <div class="form-group">
+        <label>Metrage (ml)</label>
+        <input type="number" [(ngModel)]="editEpiMetrage" placeholder="ex: 120" class="number-input">
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeEditEpiModal()">Annuler</button>
+        <button class="confirm-btn" [disabled]="!editEpiName" (click)="updateEpi()">Modifier</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Vue détail tablette (blocs) -->
+  <div class="submatrix-overlay" *ngIf="showTabletteDetail && selectedTabletteCell" (click)="closeTabletteDetail()">
+    <div class="submatrix-container tablette-detail-container" (click)="$event.stopPropagation()">
+
+      <!-- En-tete -->
+      <div class="submatrix-header">
+        <div class="submatrix-title">
+          <h2>{{ selectedTabletteCell.tabletteNumero || 'Tablette' }}</h2>
+          <span class="submatrix-badge">
+            {{ (selectedTabletteCell.blocs || []).length }} bloc{{ (selectedTabletteCell.blocs || []).length > 1 ? 's' : '' }}
+          </span>
+        </div>
+        <button class="close-submatrix" (click)="closeTabletteDetail()">&#x2715;</button>
+      </div>
+
+      <!-- Matrice des blocs -->
+      <div class="blocs-matrix" *ngIf="selectedTabletteCell.blocs && selectedTabletteCell.blocs.length > 0">
+        <div class="bloc-matrix-cell"
+             *ngFor="let bloc of selectedTabletteCell.blocs; let i = index">
+
+          <!-- Bloc supprimé -->
+          <div class="bloc-item bloc-deleted" *ngIf="bloc.deleted" (click)="addBlocBack(bloc)">
+            <span class="bloc-add-btn">+</span>
+            <span class="bloc-add-label">Ajouter</span>
+          </div>
+
+          <!-- Bloc actif -->
+          <div class="bloc-item bloc-active" *ngIf="!bloc.deleted"
+               draggable="true"
+               (dragstart)="onBlocDragStart(i, $event)"
+               (dragover)="onBlocDragOver(i, $event)"
+               (dragleave)="onBlocDragLeave(i, $event)"
+               (drop)="onBlocDrop(i, $event)"
+               (dragend)="onBlocDragEnd($event)"
+               [class.drag-over-bloc]="draggingBlocTargetIndex === i && draggingBlocIndex !== i"
+               [class.dragging-bloc]="draggingBlocIndex === i"
+               [class.multi-selected]="isBlocSelected(bloc, i)"
+               [style.background]="bloc.color"
+               (click)="openEditBlocModal(bloc, $event)">
+            <div class="select-checkbox select-checkbox-light" (click)="toggleBlocSelection(bloc, i, $event)">
+              <span *ngIf="isBlocSelected(bloc, i)">&#x2715;</span>
+            </div>
+            <span class="bloc-item-title">{{ bloc.title }}</span>
+            <span class="bloc-item-metrage" *ngIf="bloc.metrage">{{ bloc.metrage }} ml</span>
+
+            <!-- Actions au survol -->
+            <div class="bloc-hover-actions">
+              <button class="bloc-action-btn bloc-edit-action"
+                      (click)="openEditBlocModal(bloc, $event)"
+                      title="Modifier">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="bloc-action-btn bloc-delete-action"
+                      (click)="softDeleteBloc(bloc, $event)"
+                      title="Supprimer">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- État vide -->
+      <div class="tablette-empty-state" *ngIf="!selectedTabletteCell.blocs || selectedTabletteCell.blocs.length === 0">
+        <div class="empty-icon">&#x1F4E6;</div>
+        <p>Aucun bloc dans cette tablette</p>
+        <small>Cliquez sur "Ajouter un bloc" pour commencer</small>
+      </div>
+
+      <!-- Bouton ajouter -->
+      <div class="submatrix-actions">
+        <button class="add-epi-btn" (click)="openAddBlocModal()">
+          <span class="btn-icon">+</span>
+          Ajouter un bloc
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Modal : ajout/édition de bloc -->
+  <div class="modal bloc-modal" *ngIf="showBlocModal" (click)="closeBlocModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>{{ isBlocEditMode ? 'Modifier le bloc' : 'Ajouter un bloc' }}</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Numéro / Titre *</label>
+          <input type="text" [(ngModel)]="newBlocTitle" placeholder="ex: BLOC-001" autofocus>
+        </div>
+        <div class="form-group">
+          <label>Metrage (ml)</label>
+          <input type="number" [(ngModel)]="newBlocMetrage" placeholder="ex: 12" class="number-input" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Couleur</label>
+        <input type="color" [(ngModel)]="newBlocColor">
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeBlocModal()">Annuler</button>
+        <button class="confirm-btn" [disabled]="!newBlocTitle" (click)="saveBlocToTablette()">
+          {{ isBlocEditMode ? 'Modifier' : 'Ajouter' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal : édition du travers -->
+  <div class="modal travers-edit-modal" *ngIf="showEditTraversModal" (click)="closeEditTraversModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Modifier le travers</h3>
+      <div class="form-group">
+        <label>Numéro / Titre</label>
+        <input type="text" [(ngModel)]="editTraversNumero" placeholder="ex: TRAV-01" autofocus>
+      </div>
+      <div class="form-group">
+        <label>Métrage (cm)</label>
+        <input type="number" [(ngModel)]="editTraversMetrage" placeholder="0" min="0">
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeEditTraversModal()">Annuler</button>
+        <button class="confirm-btn" [disabled]="!editTraversNumero" (click)="saveTraversEdit()">Modifier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal : édition de la tablette -->
+  <div class="modal tablette-edit-modal" *ngIf="showEditTabletteModal" (click)="closeEditTabletteModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Modifier la tablette</h3>
+      <div class="form-group">
+        <label>Numéro / Titre</label>
+        <input type="text" [(ngModel)]="editTabletteNumero" placeholder="ex: TAB-01" autofocus>
+      </div>
+      <div class="form-group">
+        <label>Métrage (cm)</label>
+        <input type="number" [(ngModel)]="editTabletteMetrage" placeholder="0" min="0">
+      </div>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeEditTabletteModal()">Annuler</button>
+        <button class="confirm-btn" [disabled]="!editTabletteNumero" (click)="saveTabletteEdit()">Modifier</button>
+      </div>
+    </div>
+  </div>
+
+</div>

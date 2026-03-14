@@ -1,0 +1,281 @@
+<div class="col-12">
+  <!-- CARTE DE STATS ET TITRE -->
+  <div class="card modern-card p-4 mb-4">
+    <div class="flex align-items-center justify-content-between mb-4">
+      <div class="flex align-items-center gap-3">
+        <div class="p-3 border-circle" style="background: #EFF6FF;">
+          <i class="pi pi-book text-blue-600 text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold m-0" style="color: #1F2937;">Règles de Conservation</h1>
+          <p class="text-sm m-0 mt-1" style="color: #6B7280;">Gestion des durées de conservation par type de document</p>
+        </div>
+      </div>
+      <div class="flex align-items-center gap-4">
+        <div class="text-right">
+          <div class="text-2xl font-bold text-blue-600">{{ getNombreTotalRegles() }}</div>
+          <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total</div>
+        </div>
+        <div class="text-right">
+          <div class="text-2xl font-bold text-green-600">{{ getNombreActif() }}</div>
+          <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Valides</div>
+        </div>
+        <button pButton pRipple type="button" label="Ajouter une règle" icon="pi pi-plus" 
+                class="p-button-rounded modern-button ml-3" (click)="showAddModal()"></button>
+      </div>
+    </div>
+  </div>
+
+  <p-toast></p-toast>
+
+  <!-- CARTE DE RECHERCHE / FILTRES -->
+  <div class="card modern-card p-4 mb-4">
+    <div class="flex align-items-center gap-2 mb-4">
+      <div class="p-2 border-circle" style="background: #EFF6FF;">
+        <i class="pi pi-search text-blue-600 text-sm"></i>
+      </div>
+      <h4 class="text-lg font-semibold m-0" style="color: #1F2937;">Filtres de recherche</h4>
+    </div>
+
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label><i class="pi pi-file mr-2"></i>Type de document</label>
+        <select [(ngModel)]="selectedTypeDocumentId" (ngModelChange)="applyFilters()">
+          <option [value]="''">Tous les types</option>
+          <option *ngFor="let type of typesDocument" [value]="type.id">{{ type.title }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label><i class="pi pi-info-circle mr-2"></i>Statut</label>
+        <select [(ngModel)]="selectedStatut" (ngModelChange)="applyFilters()">
+          <option [value]="''">Tous les statuts</option>
+          <option *ngFor="let statut of statuts" [value]="statut">{{ statut }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label><i class="pi pi-gavel mr-2"></i>Décision finale</label>
+        <select [(ngModel)]="selectedDecisionFinale" (ngModelChange)="applyFilters()">
+          <option [value]="''">Toutes les décisions</option>
+          <option *ngFor="let decision of decisionsFinales" [value]="decision">{{ getDecisionLabel(decision) }}</option>
+        </select>
+      </div>
+
+      <div class="flex justify-content-end">
+        <button pButton pRipple type="button" label="Effacer" icon="pi pi-refresh" 
+                class="p-button-outlined p-button-secondary btn-clear" (click)="clearFilters()" [disabled]="!hasActiveFilters()"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLEAU DES RÈGLES -->
+  <div class="card modern-card p-0 overflow-hidden">
+    <p-table [value]="filteredRegles" [loading]="loading" [rows]="10" [paginator]="true" 
+             styleClass="modern-table" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Référence</th>
+          <th>Type de document</th>
+          <th>Durée Active</th>
+          <th>Durée Semi-Active</th>
+          <th>Décision Finale</th>
+          <th>Statut</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-regle>
+        <tr>
+          <td><span class="matricule-badge">{{ regle.reference || 'RC-' + regle.id }}</span></td>
+          <td class="font-semibold">{{ regle.typeDocumentTitre }}</td>
+          <td>{{ formatDuree(regle.actif) }}</td>
+          <td>{{ formatDuree(regle.semi_actif) }}</td>
+          <td>
+            <span class="badge" [ngClass]="getDecisionClass(regle.decisionFinal)">
+              {{ getDecisionLabel(regle.decisionFinal) }}
+            </span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getStatutClass(regle)">{{ getStatutLabel(regle) }}</span>
+          </td>
+          <td>
+            <div class="flex gap-2 justify-content-center">
+              <button pButton pRipple icon="pi pi-eye" class="action-btn view-btn" (click)="showDetails(regle)" 
+                      pTooltip="Voir détails"></button>
+              <button *ngIf="regle.estValide" pButton pRipple icon="pi pi-ban" class="action-btn invalidate-btn" 
+                      (click)="invalidate(regle.id)" pTooltip="Invalider"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center p-8 text-gray-400 italic">
+            <i class="pi pi-info-circle mr-2"></i> Aucune règle trouvée
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- DETAILS MODAL -->
+  <p-dialog [(visible)]="displayDetailsModal" [modal]="true" [style]="{width: '550px'}" 
+            header="Détails de la règle" class="modern-dialog details-dialog" [draggable]="false" [resizable]="false">
+    <div *ngIf="selectedDetailedRegle" class="dialog-content">
+      <div class="details-header mb-4">
+        <div class="flex align-items-center gap-3">
+          <div class="p-3 border-circle" style="background: rgba(37, 99, 235, 0.1);">
+            <i class="pi pi-info-circle text-blue-600 text-xl"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Référence</div>
+            <div class="text-xl font-bold text-gray-800">{{ selectedDetailedRegle.reference || 'RC-' + selectedDetailedRegle.id }}</div>
+          </div>
+          <div class="ml-auto">
+            <span class="badge" [ngClass]="getStatutClass(selectedDetailedRegle)">
+              {{ getStatutLabel(selectedDetailedRegle) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h5 class="section-title"><i class="pi pi-file mr-2"></i>Informations générales</h5>
+        <div class="grid">
+          <div class="col-12 pb-2">
+            <label class="field-label">Type de document</label>
+            <div class="font-bold text-lg">{{ selectedDetailedRegle.typeDocumentTitre }}</div>
+          </div>
+          <div class="col-6">
+            <label class="field-label">Décision finale</label>
+            <span class="badge" [ngClass]="getDecisionClass(selectedDetailedRegle.decisionFinal)">
+              {{ getDecisionLabel(selectedDetailedRegle.decisionFinal) }}
+            </span>
+          </div>
+          <div class="col-6">
+            <label class="field-label">Conservation infinie</label>
+            <div class="font-semibold" [class.text-green-600]="selectedDetailedRegle.infini" [class.text-red-600]="!selectedDetailedRegle.infini">
+              {{ selectedDetailedRegle.infini ? 'Activée' : 'Désactivée' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h5 class="section-title"><i class="pi pi-clock mr-2"></i>Délais de conservation</h5>
+        <div class="grid">
+          <div class="col-4">
+            <label class="field-label">Active</label>
+            <div class="font-bold text-blue-600 text-xl">{{ formatDuree(selectedDetailedRegle.actif) }}</div>
+          </div>
+          <div class="col-4">
+            <label class="field-label">Semi-active</label>
+            <div class="font-bold text-blue-600 text-xl">{{ formatDuree(selectedDetailedRegle.semi_actif) }}</div>
+          </div>
+          <div class="col-4">
+            <label class="field-label">Totale</label>
+            <div class="font-bold text-blue-700 text-xl">{{ selectedDetailedRegle.dureeTotale }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="selectedDetailedRegle.dateInvalidation" class="form-section bg-red-50 border-red-100">
+        <h5 class="section-title text-red-600"><i class="pi pi-ban mr-2"></i>Invalidation</h5>
+        <div class="grid">
+          <div class="col-12">
+            <label class="field-label">Date d'invalidation</label>
+            <div class="text-red-600 font-bold text-lg">{{ selectedDetailedRegle.dateInvalidation | date:'dd/MM/yyyy HH:mm' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="flex justify-content-center">
+        <button pButton pRipple label="Fermer" icon="pi pi-times" class="p-button-rounded btn-cancel px-5" (click)="displayDetailsModal=false"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- ADD RULE MODAL -->
+  <p-dialog [(visible)]="displayAddModal" [modal]="true" [style]="{width: '600px'}" 
+            header="Ajouter une règle de conservation" class="modern-dialog" [draggable]="false" [resizable]="false">
+    <div class="dialog-header-info mb-4">
+      <i class="pi pi-info-circle mr-2"></i>
+      Une règle valide par type de document est autorisée.
+    </div>
+
+    <div class="form-section">
+      <h5 class="section-title"><i class="pi pi-file mr-2"></i>Type de document</h5>
+      <div class="field">
+        <label class="field-label">Document*</label>
+        <div class="type-selection-container">
+          <p-dropdown [options]="typesDocument" [(ngModel)]="newRegle.typeDocument" optionLabel="title" 
+                      placeholder="Sélectionner un type" [style]="{'width':'100%'}" appendTo="body" class="modern-dropdown"></p-dropdown>
+          <button pButton pRipple icon="pi pi-plus" class="modern-icon-btn btn-action-vibrant" (click)="showTypeModal()" pTooltip="Nouveau type"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h5 class="section-title"><i class="pi pi-clock mr-2"></i>Durées de conservation</h5>
+      <div class="grid p-fluid">
+        <div class="col-6">
+          <div class="field">
+            <label class="field-label">Années actives</label>
+            <p-inputNumber [(ngModel)]="newRegle.actif" [showButtons]="true" [min]="0" suffix=" an(s)" buttonLayout="stacked" 
+                           incrementButtonClass="p-button-info" decrementButtonClass="p-button-info" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"></p-inputNumber>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="field">
+            <label class="field-label">Années semi-actives</label>
+            <p-inputNumber [(ngModel)]="newRegle.semi_actif" [showButtons]="true" [min]="0" suffix=" an(s)" buttonLayout="stacked"
+                           incrementButtonClass="p-button-info" decrementButtonClass="p-button-info" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"></p-inputNumber>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h5 class="section-title"><i class="pi pi-cog mr-2"></i>Paramètres</h5>
+      <div class="grid p-fluid">
+        <div class="col-6">
+          <div class="field">
+            <label class="field-label">Décision finale</label>
+            <p-dropdown [options]="decisionsFinales" [(ngModel)]="newRegle.decisionFinal" appendTo="body" class="modern-dropdown">
+              <ng-template let-item pTemplate="item">{{ getDecisionLabel(item) }}</ng-template>
+              <ng-template let-item pTemplate="selectedItem">{{ getDecisionLabel(item) }}</ng-template>
+            </p-dropdown>
+          </div>
+        </div>
+        <div class="col-6 flex align-items-center mt-3">
+          <p-checkbox [(ngModel)]="newRegle.infini" [binary]="true" label="Conservation infinie" class="modern-checkbox"></p-checkbox>
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex gap-2 justify-content-end">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-rounded btn-cancel" (click)="displayAddModal=false"></button>
+        <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-rounded btn-save" (click)="saveNewRegle()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- ADD TYPE MODAL -->
+  <p-dialog [(visible)]="displayTypeModal" [modal]="true" [style]="{width: '450px'}" 
+            header="Nouveau type de document" class="modern-dialog" [draggable]="false" [resizable]="false">
+    <div class="form-section mt-2">
+      <div class="field">
+        <label class="field-label">Titre du document*</label>
+        <input type="text" pInputText [(ngModel)]="newType.title" placeholder="Ex: Contrat" class="modern-field" />
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="flex gap-2 justify-content-end">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-rounded btn-cancel" (click)="displayTypeModal=false"></button>
+        <button pButton pRipple label="Créer" icon="pi pi-check" class="p-button-rounded btn-save" (click)="saveNewType()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

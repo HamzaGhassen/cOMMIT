@@ -1,0 +1,226 @@
+<div class="archive-container">
+  <!-- ===== EN-TÊTE ===== -->
+  <div class="archive-header">
+    <div class="header-left">
+      <button class="back-button" (click)="goToEmplacements()" pTooltip="Retour aux emplacements" tooltipPosition="bottom">
+        <i class="pi pi-arrow-left"></i>
+      </button>
+      <div>
+        <h1 class="page-title">Archives</h1>
+        <p class="page-subtitle">Gestion des épis et boîtes d'archives</p>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <div class="search-box">
+        <i class="pi pi-search search-icon"></i>
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Rechercher un épi ou une boîte..."
+          [(ngModel)]="searchQuery"
+        >
+      </div>
+      
+      <div class="view-toggle">
+        <button 
+          class="view-btn" 
+          [class.active]="viewMode === 'grid'"
+          (click)="viewMode = 'grid'"
+          pTooltip="Vue grille"
+          tooltipPosition="bottom"
+        >
+          <i class="pi pi-th-large"></i>
+        </button>
+        <button 
+          class="view-btn" 
+          [class.active]="viewMode === 'list'"
+          (click)="viewMode = 'list'"
+          pTooltip="Vue liste"
+          tooltipPosition="bottom"
+        >
+          <i class="pi pi-bars"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <p-toast></p-toast>
+
+  <!-- ===== VUE DÉTAIL D'UNE BOÎTE ===== -->
+  <div class="box-detail-view" *ngIf="showBoxDetail && selectedBox && selectedEpi">
+    <div class="box-detail-header">
+      <button class="back-button" (click)="backToBoxes()">
+        <i class="pi pi-arrow-left"></i>
+        Retour aux boîtes
+      </button>
+      <h2 class="box-detail-title">Contenu de la boîte {{ selectedBox.id }}</h2>
+    </div>
+    
+    <div class="box-detail-content">
+      <div class="box-info-card">
+        <div class="box-info-header" [style.background]="selectedEpi.couleur">
+          <i class="pi pi-box"></i>
+          <span>{{ selectedBox.id }}</span>
+        </div>
+        <div class="box-info-body">
+          <p class="box-stats">
+            <i class="pi pi-file"></i>
+            {{ selectedBox.dossiers }} dossiers
+          </p>
+          <p class="box-location">
+            <i class="pi pi-map-marker"></i>
+            {{ selectedEpi.name }} ({{ selectedEpi.id }})
+          </p>
+        </div>
+      </div>
+      
+      <div class="documents-list">
+        <h3 class="documents-title">Documents</h3>
+        <div class="documents-grid">
+          <div class="document-item" *ngFor="let doc of selectedBox.contenu">
+            <i class="pi pi-file-pdf"></i>
+            <span>{{ doc }}</span>
+          </div>
+          <div class="document-item empty" *ngIf="!selectedBox.contenu?.length">
+            <i class="pi pi-folder-open"></i>
+            <span>Boîte vide</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VUE DÉTAIL D'UN ÉPI ===== -->
+  <div class="epi-detail-view" *ngIf="selectedEpi && !showBoxDetail">
+    <div class="epi-detail-header">
+      <button class="back-button" (click)="backToEpis()">
+        <i class="pi pi-arrow-left"></i>
+        Retour aux épis
+      </button>
+    </div>
+    
+    <!-- Grand épi détaillé (comme dans la capture) -->
+    <div class="epi-large-card">
+      <div class="epi-large-header">
+        <div class="epi-large-icon" [style.background]="selectedEpi.couleur + '20'">
+          <i class="pi pi-map-marker" [style.color]="selectedEpi.couleur"></i>
+        </div>
+        <div class="epi-large-title">
+          <h2>{{ selectedEpi.name }}</h2>
+          <p class="epi-large-id">{{ selectedEpi.id }}</p>
+        </div>
+        <div class="epi-large-occupation">
+          <div class="occupation-circle" [style.background]="getOccupationColor(selectedEpi.occupation)">
+            {{ selectedEpi.occupation }}%
+          </div>
+        </div>
+      </div>
+      
+      <div class="epi-large-stats">
+        <div class="stat-item">
+          <i class="pi pi-file"></i>
+          <div>
+            <span class="stat-value">{{ selectedEpi.dossiers }}</span>
+            <span class="stat-label">dossiers</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="epi-large-boxes">
+        <h3 class="boxes-title">Boîtes</h3>
+        <div class="boxes-grid">
+          <div 
+            class="box-card" 
+            *ngFor="let box of selectedEpi.boxes"
+            (click)="selectBox(box)"
+          >
+            <div class="box-card-header">
+              <i class="pi pi-box"></i>
+              <span class="box-id">{{ box.id }}</span>
+            </div>
+            <div class="box-card-body">
+              <span class="box-dossiers">
+                <i class="pi pi-file"></i>
+                {{ box.dossiers }} dossiers
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="epi-large-actions">
+        <button class="action-btn" (click)="viewDetails(selectedEpi)">
+          <i class="pi pi-eye"></i>
+          <span>Détails</span>
+        </button>
+        <button class="action-btn" (click)="viewMap(selectedEpi)">
+          <i class="pi pi-map"></i>
+          <span>Carte</span>
+        </button>
+        <button class="action-btn" (click)="viewStats(selectedEpi)">
+          <i class="pi pi-chart-bar"></i>
+          <span>Stats</span>
+        </button>
+        <button class="action-btn" (click)="viewFullScreen(selectedEpi)">
+          <i class="pi pi-expand"></i>
+          <span>Plein écran</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VUE LISTE DES ÉPIS ===== -->
+  <div class="epis-grid-view" *ngIf="!selectedEpi">
+    <div class="epis-grid" [class.list-view]="viewMode === 'list'">
+      <div 
+        class="epi-card" 
+        *ngFor="let epi of filteredEpis"
+        (click)="selectEpi(epi)"
+        [class.list-view]="viewMode === 'list'"
+      >
+        <div class="epi-card-header">
+          <div class="epi-icon" [style.background]="epi.couleur + '20'">
+            <i class="pi pi-map-marker" [style.color]="epi.couleur"></i>
+          </div>
+          <div class="epi-info">
+            <h3 class="epi-name">{{ epi.name }}</h3>
+            <p class="epi-id">{{ epi.id }}</p>
+          </div>
+          <div class="epi-occupation" [style.background]="getOccupationColor(epi.occupation)">
+            {{ epi.occupation }}%
+          </div>
+        </div>
+        
+        <div class="epi-card-body">
+          <div class="epi-stats">
+            <div class="stat">
+              <i class="pi pi-box"></i>
+              <span>{{ epi.boxes.length }} boîtes</span>
+            </div>
+            <div class="stat">
+              <i class="pi pi-file"></i>
+              <span>{{ epi.dossiers }} dossiers</span>
+            </div>
+          </div>
+          
+          <div class="epi-preview-boxes">
+            <div class="preview-box" *ngFor="let box of epi.boxes.slice(0, 3)">
+              <span>{{ box.id }}</span>
+              <small>{{ box.dossiers }}</small>
+            </div>
+            <div class="preview-box more" *ngIf="epi.boxes.length > 3">
+              <span>+{{ epi.boxes.length - 3 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="empty-state" *ngIf="filteredEpis.length === 0">
+        <i class="pi pi-folder-open"></i>
+        <h3>Aucun épi trouvé</h3>
+        <p>Essayez de modifier vos critères de recherche</p>
+      </div>
+    </div>
+  </div>
+</div>

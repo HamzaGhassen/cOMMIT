@@ -1,0 +1,59 @@
+<div class="layout-wrapper" [class.sidebar-collapsed]="menuCollapsed">
+  <!-- Sidebar -->
+  <app-menu></app-menu>
+
+  <!-- Contenu principal -->
+  <div class="layout-content">
+    <!-- Topbar -->
+    <div class="topbar" [class.topbar-collapsed]="menuCollapsed">
+      <div class="topbar-left">
+        <!-- Page title -->
+        <h1 class="topbar-title">{{ currentPageTitle }}</h1>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Search bar -->
+        <div class="topbar-search">
+          <i class="pi pi-search search-icon"></i>
+          <input type="text" class="search-input" placeholder="Rechercher..." (click)="onSearchClick()"
+            (keyup.enter)="search($event)">
+        </div>
+
+        <!-- Notification bell -->
+        <button class="topbar-icon-btn" (click)="toggleNotifications($event)" (dblclick)="viewNotifications()">
+          <i class="pi pi-bell"></i>
+          <span class="notification-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+        </button>
+        <!-- User profile -->
+        <div class="topbar-profile" (click)="toggleProfileMenu($event)" [class.active]="profileActive">
+          <div class="profile-info">
+            <span class="profile-name">{{ userName }}</span>
+            <span class="profile-role">{{ userRole }}</span>
+          </div>
+          <div class="profile-avatar">
+            <!-- Utiliser les initiales si pas d'avatar -->
+            <div class="avatar-placeholder" *ngIf="!userInitials">{{ userInitials }}</div>
+            <img *ngIf="userInitials" src="assets/images/default-avatar.png" alt="Profile"
+              (error)="handleImageError($event)">
+          </div>
+
+          <!-- Profile dropdown menu -->
+          <div class="profile-menu" *ngIf="profileActive">
+            <ul>
+              <li><a (click)="viewProfile()"><i class="pi pi-user"></i> Mon profil</a></li>
+              <li><a (click)="editSettings()"><i class="pi pi-cog"></i> Paramètres</a></li>
+              <li><a (click)="help()"><i class="pi pi-question-circle"></i> Aide</a></li>
+              <li class="divider"></li>
+              <li><a (click)="logout()"><i class="pi pi-power-off"></i> Déconnexion</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page content -->
+    <div class="layout-main">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

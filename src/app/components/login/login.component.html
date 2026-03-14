@@ -1,0 +1,76 @@
+<p-toast></p-toast>
+<div class="animation-area flex align-items-center justify-content-center min-h-screen min-w-screen">
+  <ul class="box-area">
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+  </ul>
+
+  <div class="grid justify-content-center mt-3 p-3 lg:p-0" style="min-width:80%">
+    <div class="scalein animation-duration-500 col-12 mt-5 xl:mt-0 text-center">
+      <img src="assets/layout/images/{{config.dark ? 'logo-removebg' : 'logo-removebg'}}.png" alt="logo"
+        class="logo-img">
+    </div>
+
+    <div class="fadein animation-duration-200 col-12 xl:col-6"
+      style="border-radius:56px; padding:0.3rem; background: linear-gradient(180deg, var(--blue-700) 10%, rgba(33, 150, 243, 0) 30%);">
+      <div class="login-card">
+        <div class="text-center mb-4">
+          <div class="welcome-title">
+            <span class="office-name">Office de la Marine Marchande et des Ports</span>
+            <span class="welcome-message">Bienvenue au ......!</span>
+          </div>
+          <span class="welcome-subtitle">Connectez-vous pour continuer</span>
+        </div>
+
+        <div class="w-full md:w-10 mx-auto">
+          <div class="field-wrapper">
+            <label for="username" class="field-label">
+              <i class="pi pi-user mr-2"></i>
+              Nom d'utilisateur
+            </label>
+            <div class="p-inputgroup custom-input-group">
+              <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
+              <input id="username" [(ngModel)]="username" (keyup.enter)="onSubmit()" type="text"
+                placeholder="Entrez votre nom d'utilisateur" pInputText class="custom-input">
+            </div>
+          </div>
+
+          <div class="field-wrapper">
+            <label for="password" class="field-label">
+              <i class="pi pi-key mr-2"></i>
+              Mot de Passe
+            </label>
+            <div class="p-inputgroup custom-input-group">
+              <span class="p-inputgroup-addon"><i class="pi pi-key"></i></span>
+              <p-password [feedback]="false" id="password" (keyup.enter)="onSubmit()" [(ngModel)]="password"
+                placeholder="Entrez votre mot de passe" [toggleMask]="true" styleClass="custom-password">
+              </p-password>
+            </div>
+          </div>
+
+          <div class="flex align-items-right justify-content-between mb-4">
+            <div class="flex"></div>
+            <a class="forgot-password-link" (click)="resetPassword()">
+              <i class="pi pi-question-circle mr-1"></i>
+              Mot de Passe oublié ?
+            </a>
+          </div>
+
+          <button pButton pRipple label="Se connecter" (click)="onSubmit()" icon="pi pi-sign-in" iconPos="right"
+            class="login-button">
+          </button>
+
+          <div [hidden]="badCred == null" class="error-message mt-2">
+            <!-- Error message content -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

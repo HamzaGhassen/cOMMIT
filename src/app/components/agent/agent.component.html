@@ -1,0 +1,455 @@
+<div class="col-12">
+  <!-- ===== CARTE DE RECHERCHE MODERNE ===== -->
+  <div class="card modern-card p-4 mb-4">
+    <div class="flex align-items-center gap-2 mb-4">
+      <div class="p-2 border-circle" style="background: #EFF6FF;">
+        <i class="pi pi-search text-blue-600"></i>
+      </div>
+      <h4 class="text-xl font-semibold m-0" style="color: #1F2937;">Recherche d'agents</h4>
+    </div>
+
+    <p-toast></p-toast>
+
+    <form [formGroup]="searchForm">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-4">
+          <div class="field">
+            <label for="matricule" class="block text-sm font-medium mb-2" style="color: #4B5563;">
+              <i class="pi pi-id-card mr-2"></i>Matricule
+            </label>
+            <input pInputText id="matricule" type="text" placeholder="Saisir un matricule" formControlName="matricule"
+              class="w-full modern-input" />
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="flex justify-content-end mt-3">
+      <button pButton pRipple type="button" (click)="refreshTable(null)" label="Chercher" icon="pi pi-search"
+        class="p-button-rounded modern-button"></button>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="col-12">
+    <!-- ===== CARTE TABLEAU MODERNE ===== -->
+    <div class="card modern-card p-4">
+      <div class="flex align-items-center justify-content-between mb-4">
+        <div class="flex align-items-center gap-2">
+          <div class="p-2 border-circle" style="background: #EFF6FF;">
+            <i class="pi pi-users text-blue-600"></i>
+          </div>
+          <h4 class="text-xl font-semibold m-0" style="color: #1F2937;">Liste des agents</h4>
+          <span class="badge-count">{{ totalRecords }} agents</span>
+        </div>
+
+        <!-- Actions du tableau -->
+        <div class="flex gap-2">
+          <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text modern-icon-btn"
+            (click)="refreshTable(null)" pTooltip="Rafraîchir" tooltipPosition="bottom"></button>
+          <button *ngIf="selectedAgents?.length > 0" pButton pRipple icon="pi pi-trash"
+            class="p-button-rounded p-button-danger modern-icon-btn" (click)="deleteSelectedAgents()"
+            pTooltip="Supprimer la sélection" tooltipPosition="bottom"></button>
+        </div>
+      </div>
+
+      <p-toast></p-toast>
+
+      <!-- ===== TABLEAU MODERNE ===== -->
+      <p-table #dt [value]="loadedAgents" dataKey="id" [rows]="10" [loading]="loading" [rowHover]="true"
+        styleClass="modern-table" [globalFilterFields]="['firstName','registrationNumber', 'cin', 'job']"
+        [(selection)]="selectedAgents" scrollDirection="both" [scrollable]="true" selectionMode="multiple"
+        [totalRecords]="totalRecords" [paginator]="true" [rowsPerPageOptions]="[10,20,30,50]"
+        [showCurrentPageReport]="true" currentPageReportTemplate="Affichage {first} à {last} de {totalRecords} entrées"
+        [lazy]="true" (onLazyLoad)="loadDataLazy($event)" responsiveLayout="scroll">
+        <!-- En-tête du tableau -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width:200px" class="table-header">
+              <div class="flex justify-content-between align-items-center" pSortableColumn="user.registrationNumber">
+                <span>Matricule</span>
+                <p-sortIcon field="registrationNumber"></p-sortIcon>
+              </div>
+            </th>
+            <th style="width:200px" class="table-header">
+              <div class="flex justify-content-between align-items-center" pSortableColumn="user.lastName">
+                <span>Nom</span>
+                <p-sortIcon field="lastName"></p-sortIcon>
+              </div>
+            </th>
+            <th style="width:200px" class="table-header">
+              <div class="flex justify-content-between align-items-center" pSortableColumn="user.firstName">
+                <span>Prénom</span>
+                <p-sortIcon field="firstName"></p-sortIcon>
+              </div>
+            </th>
+            <th style="width:200px" class="table-header">
+              <div class="flex justify-content-between align-items-center" pSortableColumn="user.position">
+                <span>Poste</span>
+                <p-sortIcon field="position"></p-sortIcon>
+              </div>
+            </th>
+            <th style="width:200px" class="table-header">
+              <div class="flex justify-content-between align-items-center" pSortableColumn="user.job">
+                <span>Fonction</span>
+                <p-sortIcon field="job"></p-sortIcon>
+              </div>
+            </th>
+            <th style="width:200px" class="table-header">
+              <div class="flex justify-content-between align-items-center" pSortableColumn="harbor">
+                <span>Port</span>
+                <p-sortIcon field="harbor"></p-sortIcon>
+              </div>
+            </th>
+            <th pFrozenColumn alignFrozen="right" style="width:200px" class="table-header">
+              <div class="flex justify-content-center">
+                <span>Actions</span>
+              </div>
+            </th>
+          </tr>
+        </ng-template>
+
+        <!-- Corps du tableau -->
+        <ng-template pTemplate="body" let-agent>
+          <tr class="table-row">
+            <td style="width:200px">
+              <span class="matricule-badge">{{agent?.user?.registrationNumber}}</span>
+            </td>
+            <td style="width:200px">
+              {{agent?.user?.lastName}}
+            </td>
+            <td style="width:200px">
+              {{agent?.user?.firstName}}
+            </td>
+            <td style="width:200px">
+              <span class="badge-position">{{agent?.user?.position?.name || '-'}}</span>
+            </td>
+            <td style="width:200px">
+              <span class="badge-job">{{agent?.user?.job?.title || '-'}}</span>
+            </td>
+            <td style="width:200px">
+              <span class="badge-harbor">{{agent?.user?.harbor?.title || '-'}}</span>
+            </td>
+            <td style="width:200px" pFrozenColumn alignFrozen="right">
+              <div class="flex gap-2 justify-content-center">
+                <button pButton pRipple icon="pi pi-eye" class="action-btn view-btn" (click)="loadAgent(agent.id)"
+                  pTooltip="Voir détails" tooltipPosition="top"></button>
+                <button pButton pRipple icon="pi pi-pencil" class="action-btn edit-btn" (click)="editAgent(agent)"
+                  pTooltip="Modifier" tooltipPosition="top"></button>
+                <button pButton pRipple icon="pi pi-trash" class="action-btn delete-btn" (click)="deleteAgent(agent)"
+                  pTooltip="Supprimer" tooltipPosition="top"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- Message vide -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="empty-message">
+              <i class="pi pi-info-circle mr-2"></i>
+              Aucun agent trouvé.
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- ===== DIALOGUE MODERNE ===== -->
+    <p-dialog [(visible)]="agentDialog" [style]="{width: '80%', maxWidth: '1200px'}" header="Modifier un Agent"
+      [modal]="true" class="modern-dialog">
+      <div class="dialog-header-info">
+        <i class="pi pi-info-circle mr-2"></i>
+        Veuillez remplir tous les champs obligatoires marqués par un astérisque (*).
+      </div>
+
+      <ng-template pTemplate="content">
+        <form [formGroup]="myForm">
+          <input type="text" hidden pInputText formControlName="id" />
+
+          <!-- SECTION 1: Détails Personnelles -->
+          <div class="form-section">
+            <h5 class="section-title">
+              <i class="pi pi-user mr-2"></i>
+              Détails Personnelles
+            </h5>
+
+            <div class="grid p-fluid">
+              <div class="col-12 md:col-3">
+                <div class="field">
+                  <label class="field-label">Nom*</label>
+                  <input pInputText formControlName="lastName" readonly class="modern-field" />
+                </div>
+              </div>
+              <div class="col-12 md:col-3">
+                <div class="field">
+                  <label class="field-label">Prénom*</label>
+                  <input pInputText formControlName="firstName" readonly class="modern-field" />
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">CIN*</label>
+                  <input pInputText formControlName="cin" readonly class="modern-field" />
+                </div>
+              </div>
+              <div class="col-12 md:col-3">
+                <div class="field">
+                  <label class="field-label">Sexe*</label>
+                  <p-dropdown appendTo="body" [options]="genders" placeholder="Sélectionner" formControlName="gender"
+                    optionLabel="label" optionValue="value" class="modern-dropdown"></p-dropdown>
+                  <div *ngIf="myForm.get('gender')?.invalid && myForm.get('gender')?.dirty" class="error-message">
+                    <small>Champ obligatoire.</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 md:col-3">
+                <div class="field">
+                  <label class="field-label">Date de Naissance*</label>
+                  <p-calendar appendTo="body" [showIcon]="true" dateFormat="dd/mm/yy" [showButtonBar]="true"
+                    placeholder="jj/MM/aaaa" formControlName="dob" class="modern-calendar"></p-calendar>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">E-Mail*</label>
+                  <input pInputText type="email" placeholder="E-mail" formControlName="email" class="modern-field" />
+                  <div *ngIf="myForm.get('email')?.invalid && myForm.get('email')?.dirty" class="error-message">
+                    <small *ngIf="myForm.get('email')?.hasError('required')">Email est obligatoire.</small>
+                    <small *ngIf="myForm.get('email')?.hasError('email')">Format incorrect.</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Numéro de téléphone</label>
+                  <input pInputText placeholder="Numéro de téléphone" formControlName="phoneNumber"
+                    class="modern-field" />
+                  <div *ngIf="myForm.get('phoneNumber')?.invalid && myForm.get('phoneNumber')?.dirty"
+                    class="error-message">
+                    <small>Format incorrect (8 chiffres).</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: Détails Professionnelle -->
+          <div class="form-section">
+            <h5 class="section-title">
+              <i class="pi pi-briefcase mr-2"></i>
+              Détails Professionnelle
+            </h5>
+
+            <div class="grid p-fluid">
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Matricule*</label>
+                  <input pInputText formControlName="registrationNumber" readonly class="modern-field" />
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Port*</label>
+                  <p-dropdown appendTo="body" [options]="harbors" placeholder="Choisir un Port" optionLabel="title"
+                    [filter]="true" filterBy="title" [showClear]="true" formControlName="harbor" readonly
+                    class="modern-dropdown"></p-dropdown>
+                  <div *ngIf="myForm.get('harbor')?.invalid && myForm.get('harbor')?.dirty" class="error-message">
+                    <small>Port est obligatoire.</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Poste*</label>
+                  <p-dropdown appendTo="body" [options]="positions" placeholder="Choisir un Poste" [filter]="true"
+                    filterBy="name" optionLabel="name" [showClear]="true" formControlName="position" readonly
+                    class="modern-dropdown"></p-dropdown>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Fonction*</label>
+                  <p-dropdown appendTo="body" [options]="jobs" placeholder="Choisir une fonction" [filter]="true"
+                    filterBy="title" optionLabel="title" [showClear]="true" formControlName="job" readonly
+                    class="modern-dropdown"></p-dropdown>
+                </div>
+              </div>
+              <div class="col-12 md:col-4">
+                <div class="field">
+                  <label class="field-label">Date Récrutement</label>
+                  <p-calendar dateFormat="dd/mm/yy" formControlName="recruitmentDate" appendTo="body" [showIcon]="true"
+                    [showButtonBar]="true" class="modern-calendar"></p-calendar>
+                </div>
+              </div>
+              <div class="col-12 md:col-4">
+                <div class="field">
+                  <label class="field-label">Date Fonction</label>
+                  <p-calendar dateFormat="dd/mm/yy" formControlName="startingDate" appendTo="body" [showIcon]="true"
+                    [showButtonBar]="true" class="modern-calendar"></p-calendar>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Emploi Effectif</label>
+                  <input pInputText formControlName="employment" placeholder="Saisir un emploi Effectif" readonly
+                    class="modern-field" />
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Grade</label>
+                  <input pInputText formControlName="grade" placeholder="Saisir un grade" readonly
+                    class="modern-field" />
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">College</label>
+                  <input pInputText formControlName="college" placeholder="Saisir un college" readonly
+                    class="modern-field" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 3: Sécurité et Confidentialité -->
+          <div class="form-section">
+            <h5 class="section-title">
+              <i class="pi pi-shield mr-2"></i>
+              Sécurité et Confidentialité
+            </h5>
+
+            <div class="grid p-fluid">
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Nom d'utilisateur*</label>
+                  <input pInputText placeholder="Nom d'utilisateur" formControlName="username" readonly
+                    class="modern-field" />
+                  <div *ngIf="myForm.get('username')?.invalid && myForm.get('username')?.dirty" class="error-message">
+                    <small>Nom d'utilisateur est obligatoire.</small>
+                  </div>
+                  <div *ngIf="myForm.errors?.['usernameTaken']" class="error-message">
+                    <small>Nom d'utilisateur déjà utilisé.</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Rôle*</label>
+                  <p-dropdown appendTo="body" [options]="keys" formControlName="role" placeholder="Choisir un Rôle"
+                    [showClear]="true" class="modern-dropdown"></p-dropdown>
+                </div>
+              </div>
+
+              <div [hidden]="isEdit" class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Mot de Passe*</label>
+                  <p-password [feedback]="false" placeholder="Mot de Passe" [toggleMask]="true"
+                    formControlName="password" class="modern-password"></p-password>
+                </div>
+              </div>
+              <div [hidden]="isEdit" class="col-12 md:col-6">
+                <div class="field">
+                  <label class="field-label">Confirmation*</label>
+                  <p-password [feedback]="false" placeholder="Confirmation" formControlName="confirmPassword"
+                    [toggleMask]="true" class="modern-password"></p-password>
+                  <div *ngIf="myForm.errors?.['notmatched'] && (myForm.touched || myForm.dirty)" class="error-message">
+                    <small>Mot de passe ne correspond pas.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 4: Changement de mot de passe (mode édition) -->
+          <div [hidden]="!isEdit">
+            <p-panel header="Changer le mot de passe" [toggleable]="true" [collapsed]="true" class="modern-panel">
+              <form [formGroup]="pwdForm">
+                <div class="grid p-fluid">
+                  <div class="col-12 md:col-6">
+                    <div class="field">
+                      <label class="field-label">Nouveau mot de passe</label>
+                      <p-password [feedback]="false" placeholder="Nouveau mot de passe" [toggleMask]="true"
+                        formControlName="password" class="modern-password"></p-password>
+                    </div>
+                  </div>
+                  <div class="col-12 md:col-6">
+                    <div class="field">
+                      <label class="field-label">Confirmation</label>
+                      <p-password [feedback]="false" placeholder="Confirmation" formControlName="confirmPassword"
+                        [toggleMask]="true" class="modern-password"></p-password>
+                      <div *ngIf="pwdForm.errors?.['notmatched'] && (pwdForm.touched || pwdForm.dirty)"
+                        class="error-message">
+                        <small>Mot de passe ne correspond pas.</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </p-panel>
+          </div>
+        </form>
+      </ng-template>
+
+      <ng-template pTemplate="footer">
+        <div class="flex gap-2 justify-content-end">
+          <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-outlined p-button-secondary"
+            (click)="hideDialog()"></button>
+          <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="modern-save-btn" (click)="saveAgent()"
+            [disabled]="myForm.invalid || pwdForm.errors?.['notmatched']"></button>
+        </div>
+      </ng-template>
+    </p-dialog>
+
+    <!-- ===== DIALOGUE DE SUPPRESSION SIMPLE ===== -->
+    <p-dialog [(visible)]="deleteAgentDialog" header="Confirmation" [modal]="true" [style]="{width:'400px'}"
+      class="modern-dialog">
+      <div class="flex align-items-center gap-3 p-3">
+        <div class="bg-red-100 p-3 border-circle">
+          <i class="pi pi-exclamation-triangle text-red-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="font-medium m-0">Confirmation de suppression</p>
+          <p class="text-sm mt-1" style="color: #6B7280;">
+            Êtes-vous sûr de vouloir supprimer <span class="font-bold">{{agent?.user?.firstName}}
+              {{agent?.user?.lastName}}</span> ?
+          </p>
+        </div>
+      </div>
+      <ng-template pTemplate="footer">
+        <div class="flex gap-2 justify-content-end">
+          <button pButton pRipple label="Non" icon="pi pi-times" class="p-button-outlined p-button-secondary"
+            (click)="deleteAgentDialog = false"></button>
+          <button pButton pRipple label="Oui" icon="pi pi-check" class="p-button-danger"
+            (click)="confirmDelete()"></button>
+        </div>
+      </ng-template>
+    </p-dialog>
+
+    <!-- ===== DIALOGUE DE SUPPRESSION MULTIPLE ===== -->
+    <p-dialog [(visible)]="deleteAgentsDialog" header="Confirmation" [modal]="true" [style]="{width:'400px'}"
+      class="modern-dialog">
+      <div class="flex align-items-center gap-3 p-3">
+        <div class="bg-red-100 p-3 border-circle">
+          <i class="pi pi-exclamation-triangle text-red-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="font-medium m-0">Suppression multiple</p>
+          <p class="text-sm mt-1" style="color: #6B7280;">
+            Êtes-vous sûr de vouloir supprimer les agents sélectionnés ?
+          </p>
+        </div>
+      </div>
+      <ng-template pTemplate="footer">
+        <div class="flex gap-2 justify-content-end">
+          <button pButton pRipple label="Non" icon="pi pi-times" class="p-button-outlined p-button-secondary"
+            (click)="deleteAgentsDialog = false"></button>
+          <button pButton pRipple label="Oui" icon="pi pi-check" class="p-button-danger"
+            (click)="confirmDeleteSelected()"></button>
+        </div>
+      </ng-template>
+    </p-dialog>
+  </div>
+</div>

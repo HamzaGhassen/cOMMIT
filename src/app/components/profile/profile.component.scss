@@ -1,0 +1,90 @@
+.profile-container {
+    animation: fadeIn 0.5s ease-out;
+}
+
+:host ::ng-deep {
+    .card {
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        transition: all 0.3s ease;
+        padding: 2rem;
+        margin-bottom: 2rem;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    }
+
+    .p-button {
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+
+        &.p-button-outlined {
+            color: #2563eb;
+            border-color: #2563eb;
+
+            &:enabled:hover {
+                background: rgba(37, 99, 235, 0.05);
+                color: #1d4ed8;
+                border-color: #1d4ed8;
+            }
+        }
+
+        &.p-button-success {
+            background-color: #10b981;
+            border-color: #10b981;
+
+            &:enabled:hover {
+                background-color: #059669;
+                border-color: #059669;
+            }
+        }
+    }
+
+    .surface-section {
+        background: transparent !important;
+    }
+
+    .list-item {
+        transition: background-color 0.2s ease;
+        border-radius: 0.5rem;
+
+        &:hover {
+            background-color: #f8fafc;
+        }
+    }
+
+    .border-top-1.surface-border {
+        border-top-color: #e5e7eb !important;
+    }
+
+    .p-inputtext {
+        border-radius: 0.5rem;
+        border-color: #d1d5db;
+        transition: all 0.2s ease;
+
+        &:enabled:focus {
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+            border-color: #2563eb;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

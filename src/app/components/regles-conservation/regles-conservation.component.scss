@@ -1,0 +1,442 @@
+// ===== VARIABLES =====
+$primary: #2563eb;
+$primary-dark: #1e40af;
+$primary-light: #93c5fd;
+$success: #10b981;
+$success-light: #d1fae5;
+$warning: #f59e0b;
+$warning-light: #fef3c7;
+$danger: #ef4444;
+$danger-light: #fee2e2;
+$info: #3b82f6;
+$info-light: #dbeafe;
+
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+
+$border-radius-sm: 8px;
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+$border-radius-xl: 24px;
+
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+// ===== ANIMATIONS =====
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+:host {
+  display: block;
+  animation: fadeIn 0.3s ease-out;
+  padding: 1.5rem;
+}
+
+// ===== CARTES MODERNES =====
+.modern-card {
+  background: white;
+  border-radius: $border-radius-xl;
+  box-shadow: $shadow-md;
+  transition: all 0.3s ease;
+  border: 1px solid $gray-200;
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+
+  &:hover {
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, $primary, $primary-light);
+  }
+}
+
+// ===== BADGES =====
+.badge-count {
+  background: $info-light;
+  color: $primary-dark;
+  padding: 0.25rem 0.75rem;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  border: 1px solid rgba($primary, 0.2);
+  margin-left: 1rem;
+}
+
+.matricule-badge {
+  color: $primary-dark;
+  background: rgba($primary, 0.08);
+  padding: 0.2rem 0.6rem;
+  border-radius: $border-radius-sm;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 1px solid rgba($primary, 0.1);
+}
+
+.badge-success { background: $success-light; color: $success; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+.badge-warning { background: $warning-light; color: $warning; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+.badge-info { background: $info-light; color: $info; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+.badge-danger { background: $danger-light; color: $danger; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+
+// ===== BOUTONS MODERNES ET COLORÉS =====
+.modern-button {
+  background: linear-gradient(135deg, $primary 0%, $primary-dark 100%) !important;
+  border: none !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: $border-radius-md !important;
+  color: white !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: $shadow-md !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px) !important;
+    box-shadow: $shadow-lg !important;
+    background: linear-gradient(135deg, $primary-dark 0%, $primary 100%) !important;
+  }
+}
+
+.btn-save {
+  background: linear-gradient(135deg, $success 0%, darken($success, 10%) 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 2rem !important;
+  box-shadow: 0 4px 10px rgba($success, 0.3) !important;
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, darken($success, 10%) 0%, $success 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 15px rgba($success, 0.4) !important;
+  }
+}
+
+.btn-cancel {
+  background: linear-gradient(135deg, $gray-200 0%, $gray-300 100%) !important;
+  border: 1px solid $gray-300 !important;
+  color: $gray-700 !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1.5rem !important;
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, $danger-light 0%, rgba($danger, 0.1) 100%) !important;
+    color: $danger !important;
+    border-color: rgba($danger, 0.3) !important;
+    transform: translateY(-2px) !important;
+  }
+}
+
+.btn-action-vibrant {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%) !important;
+  color: white !important;
+  border: none !important;
+  
+  &:hover {
+    transform: scale(1.1) rotate(5deg) !important;
+    box-shadow: 0 4px 12px rgba(#8b5cf6, 0.4) !important;
+  }
+}
+
+.modern-icon-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: $border-radius-md !important;
+  transition: all 0.2s ease !important;
+  color: $gray-600 !important;
+  background: $gray-100 !important;
+  border: 1px solid $gray-200 !important;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: white !important;
+    color: $primary !important;
+    border-color: $primary !important;
+  }
+}
+
+.action-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $border-radius-md;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+
+  &.view-btn { 
+    background: rgba($info, 0.1) !important; 
+    color: $info !important; 
+    &:hover { background: $info !important; color: white !important; transform: rotate(15deg) scale(1.1); } 
+  }
+  &.invalidate-btn { 
+    background: rgba($danger, 0.1) !important; 
+    color: $danger !important; 
+    &:hover { background: $danger !important; color: white !important; transform: rotate(-15deg) scale(1.1); } 
+  }
+}
+
+// ===== TABLEAU MODERNE =====
+.modern-table {
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  background: white;
+  border: 1px solid $gray-200;
+
+  ::ng-deep {
+    .p-datatable-thead>tr>th {
+      background: $gray-50;
+      color: $gray-700;
+      font-weight: 700;
+      padding: 1.25rem 1rem;
+      border-bottom: 2px solid $gray-200;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .p-datatable-tbody>tr {
+      transition: all 0.2s ease;
+      border-bottom: 1px solid $gray-100;
+
+      &:hover { background: rgba($primary, 0.02); }
+      >td { padding: 1.25rem 1rem; color: $gray-600; font-size: 1rem; }
+    }
+    
+    .p-paginator {
+        border-top: 1px solid $gray-200;
+        padding: 1rem;
+    }
+  }
+}
+
+// ===== FORMULAIRES ET INPUTS MODERNES =====
+.modern-field {
+  width: 100%;
+  padding: 0.75rem 1rem !important;
+  border: 1px solid $gray-200 !important;
+  border-radius: $border-radius-md !important;
+  transition: all 0.2s ease !important;
+  background: white !important;
+
+  &:focus {
+    border-color: $primary !important;
+    box-shadow: 0 0 0 3px rgba($primary, 0.1) !important;
+    outline: none !important;
+  }
+}
+
+.modern-dropdown {
+  width: 100% !important;
+
+  ::ng-deep {
+    .p-dropdown {
+      width: 100%;
+      border: 1px solid $gray-200;
+      border-radius: $border-radius-md;
+      padding: 0.5rem;
+      transition: all 0.2s ease;
+      background: white !important;
+
+      &:hover {
+        border-color: $primary;
+      }
+
+      &.p-focus {
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, 0.1);
+      }
+
+      .p-dropdown-label {
+        color: $gray-800;
+        font-weight: 600;
+      }
+
+      .p-dropdown-trigger {
+        color: $gray-400;
+      }
+    }
+  }
+}
+
+::ng-deep .p-inputnumber {
+  .p-inputtext {
+    border-radius: $border-radius-md 0 0 $border-radius-md !important;
+    padding: 0.75rem 1rem !important;
+    font-weight: 600 !important;
+    color: $primary-dark !important;
+    border: 1px solid $gray-200 !important;
+    
+    &:focus {
+        border-color: $primary !important;
+        box-shadow: none !important;
+    }
+  }
+  
+  .p-inputnumber-button {
+    background: $gray-100 !important;
+    color: $gray-600 !important;
+    border: 1px solid $gray-200 !important;
+    width: 3rem !important;
+    
+    &:hover {
+        background: $primary !important;
+        color: white !important;
+        border-color: $primary !important;
+    }
+    
+    &.p-inputnumber-increment-button { border-bottom: none !important; border-radius: 0 $border-radius-md 0 0 !important; }
+    &.p-inputnumber-decrement-button { border-radius: 0 0 $border-radius-md 0 !important; }
+  }
+}
+
+.form-section {
+  background: $gray-50;
+  border-radius: $border-radius-lg;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid $gray-200;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+}
+
+.section-title {
+  color: $gray-800;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid $gray-200;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  i { color: $primary; }
+}
+
+.field-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $gray-500;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// ===== DIALOGUE MODERNE =====
+.modern-dialog {
+  ::ng-deep {
+    .p-dialog {
+      border-radius: $border-radius-xl !important;
+      overflow: hidden;
+      box-shadow: $shadow-lg !important;
+
+      .p-dialog-header {
+        background: $gray-50;
+        border-bottom: 1px solid $gray-200;
+        padding: 1.5rem;
+        font-weight: 700;
+        
+        .p-dialog-title { font-size: 1.35rem; font-weight: 800; color: $gray-800; }
+        .p-dialog-header-icon { 
+            width: 2.5rem; height: 2.5rem; border-radius: 50%; 
+            &:hover { background: $danger-light; color: $danger; }
+        }
+      }
+
+      .p-dialog-content { padding: 1.5rem; background: white; }
+      .p-dialog-footer { background: $gray-50; border-top: 1px solid $gray-200; padding: 1.25rem 1.5rem; }
+    }
+  }
+}
+
+// ===== FILTRES =====
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+  label { font-size: 0.9rem; font-weight: 700; color: $gray-700; display: flex; align-items: center; gap: 0.5rem; }
+  
+  select {
+    width: 100%;
+    height: 48px;
+    padding: 0 1rem;
+    border: 1px solid $gray-200;
+    border-radius: $border-radius-md;
+    transition: all 0.3s ease;
+    background: white;
+    font-weight: 600;
+    color: $gray-800;
+    cursor: pointer;
+    &:focus { outline: none; border-color: $primary; box-shadow: 0 0 0 4px rgba($primary, 0.1); }
+  }
+}
+
+.btn-clear {
+  height: 48px;
+  background: white !important;
+  color: $gray-600 !important;
+  border: 2px solid $gray-200 !important;
+  font-weight: 700 !important;
+  &:hover:not(:disabled) { background: $gray-100 !important; color: $gray-800 !important; transform: translateY(-2px); }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 4rem;
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid $gray-100;
+    border-top: 5px solid $primary;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,0 +1,92 @@
+<!-- config.component.html - Design modernisé, structure inchangée -->
+<div id="layout-config" class="layout-config" [ngClass]="{'layout-config-active': appMain.configActive}" (click)="appMain.onConfigClick($event)">
+  <!-- Bouton d'ouverture avec design moderne -->
+  <a style="cursor: pointer" id="layout-config-button" class="layout-config-button" (click)="onConfigButtonClick($event)">
+    <i class="pi pi-cog"></i>
+  </a>
+  
+  <!-- Bouton de fermeture -->
+  <button pButton pRipple type="button" icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text layout-config-close" (click)="onConfigButtonClick($event)"></button>
+  
+  <div class="layout-config-content">
+    <!-- Échelle des composants -->
+    <h6 class="mt-0 config-section-title">
+      <i class="pi pi-sitemap mr-2"></i>
+      Échelle des composants
+    </h6>
+    <div class="config-scale modern-scale">
+      <button pButton pRipple type="button" icon="pi pi-minus" (click)="decrementScale()" class="p-button-rounded p-button-text scale-btn" [disabled]="scale === scales[0]"></button>
+      <div class="scale-indicator">
+        <i *ngFor="let item of scales" class="pi pi-circle-fill scale-dot" [ngClass]="{'scale-active': item === scale}"></i>
+      </div>
+      <button pButton pRipple type="button" icon="pi pi-plus" (click)="incrementScale()" class="p-button-rounded p-button-text scale-btn" [disabled]="scale === scales[scales.length - 1]"></button>
+      <span class="scale-value">{{ scale }}px</span>
+    </div>
+
+    <!-- Style de saisie -->
+    <h6 class="config-section-title">
+      <i class="pi pi-pencil mr-2"></i>
+      Style de saisie
+    </h6>
+    <div class="p-formgroup-inline modern-radio-group">
+      <div class="field-radiobutton modern-radio">
+        <p-radioButton name="inputStyle" value="outlined" [(ngModel)]="config.inputStyle" (onClick)="onInputStyleChange()"
+                      inputId="inputStyle1"></p-radioButton>
+        <label for="inputStyle1">Décrit</label>
+      </div>
+      <div class="field-radiobutton modern-radio">
+        <p-radioButton name="inputStyle" value="filled" [(ngModel)]="config.inputStyle" (onClick)="onInputStyleChange()"
+                      inputId="inputStyle2"></p-radioButton>
+        <label for="inputStyle2">Remplie</label>
+      </div>
+    </div>
+
+    <!-- Effet ondulatoire -->
+    <h6 class="config-section-title">
+      <i class="pi pi-wave-pulse mr-2"></i>
+      Effet ondulatoire
+    </h6>
+    <div class="modern-switch">
+      <p-inputSwitch [ngModel]="config.ripple" (onChange)="onRippleChange($event.checked)"></p-inputSwitch>
+      <span class="switch-label">{{ config.ripple ? 'Activé' : 'Désactivé' }}</span>
+    </div>
+
+    <!-- Type de Menu -->
+    <h6 class="config-section-title">
+      <i class="pi pi-bars mr-2"></i>
+      Type de Menu
+    </h6>
+    <div class="p-formgroup-inline modern-radio-group">
+      <div class="field-radiobutton modern-radio">
+        <p-radioButton name="menuType" value="static" [(ngModel)]="app.menuMode" (onClick)="appMain.isStatic()"
+                      inputId="menuType1"></p-radioButton>
+        <label for="menuType1">Statique</label>
+      </div>
+      <div class="field-radiobutton modern-radio">
+        <p-radioButton name="menuType" value="overlay" [(ngModel)]="app.menuMode" (onClick)="appMain.isOverlay()"
+                      inputId="menuType2"></p-radioButton>
+        <label for="menuType2">Dynamique</label>
+      </div>
+    </div>
+
+    <!-- Thème -->
+    <h6 class="config-section-title">
+      <i class="pi pi-palette mr-2"></i>
+      Thème
+    </h6>
+    <div class="grid free-themes modern-themes">
+      <div class="col-3 text-center">
+        <button class="p-link modern-theme-btn" (click)="changeTheme('lara-light-indigo', false)">
+          <img src="assets/layout/images/themes/sun.png" alt="Lara Light Indigo">
+          <span class="theme-label">Clair</span>
+        </button>
+      </div>
+      <div class="col-3 text-center">
+        <button class="p-link modern-theme-btn" (click)="changeTheme('lara-dark-indigo', true)">
+          <img src="assets/layout/images/themes/night.png" alt="Lara Dark Indigo">
+          <span class="theme-label">Sombre</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,167 @@
+.dashboard-container {
+  padding: 1rem;
+  animation: fadeIn 0.5s ease-out;
+
+  .welcome-card {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+  }
+
+  .stat-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+  }
+
+  .chart-bar {
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: scaleX(1.05);
+      filter: brightness(1.1);
+    }
+  }
+
+  .epi-3d-card {
+    position: relative;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px) rotateX(2deg) rotateY(-3deg);
+
+      .epi-3d-icon {
+        transform: translateZ(25px) scale(1.2);
+      }
+
+      .shelf {
+        transform: translateZ(10px);
+      }
+    }
+  }
+
+  .activity-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateX(4px);
+    }
+  }
+
+  .alert-item {
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* PrimeNG Buttons Styling tailored for Dashboard */
+  .welcome-card {
+    ::ng-deep .p-button.p-button-text {
+      background: rgba(255, 255, 255, 0.2) !important;
+      border: 1px solid rgba(255, 255, 255, 0.4) !important;
+      color: white !important;
+      width: 45px !important;
+      height: 45px !important;
+      border-radius: 50% !important;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+
+      &:hover,
+      &:focus {
+        background: rgba(255, 255, 255, 0.35) !important;
+        transform: translateY(-2px);
+      }
+
+      .p-button-icon {
+        font-size: 1.2rem;
+        color: white !important;
+      }
+    }
+  }
+
+  ::ng-deep .p-button.p-button-outlined {
+    background: transparent;
+    border: 1px solid #3b82f6 !important;
+    color: #3b82f6 !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+
+    &:hover,
+    &:focus {
+      background: rgba(59, 130, 246, 0.1) !important;
+      color: #1d4ed8 !important;
+      border-color: #1d4ed8 !important;
+      transform: translateY(-2px);
+    }
+  }
+
+  ::ng-deep .p-button:not(.p-button-outlined):not(.p-button-text) {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+    font-weight: 600;
+    transition: all 0.3s ease;
+
+    &:hover,
+    &:focus {
+      background: linear-gradient(135deg, #60a5fa, #2563eb) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    padding: 0.5rem;
+
+    .welcome-card {
+      h1 {
+        font-size: 1.5rem !important;
+      }
+    }
+
+    .stat-card .text-3xl {
+      font-size: 1.5rem !important;
+    }
+  }
+}

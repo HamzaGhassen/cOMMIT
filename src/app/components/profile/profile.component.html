@@ -1,0 +1,155 @@
+<div class="grid profile-container" style="background: #f8fafc; min-height: calc(100vh - 70px); padding: 1.5rem;">
+    <div class="col-12 lg:col-8">
+        <div class="card p-5 border-round-xl shadow-2" style="background: white; border: 1px solid #e5e7eb;">
+            <div class="surface-section">
+                <div class="flex justify-content-between align-items-center mb-3">
+                    <div class="font-medium text-3xl text-900">À propos</div>
+                    <div>
+                        <button *ngIf="!isEditing" pButton pRipple label="Éditer" icon="pi pi-pencil"
+                            class="p-button-outlined p-button-sm mr-2" (click)="toggleEdit()"></button>
+                        <button *ngIf="isEditing" pButton pRipple label="Enregistrer" icon="pi pi-check"
+                            class="p-button-success p-button-sm mr-2" (click)="saveProfile()"></button>
+                        <button *ngIf="isEditing" pButton pRipple label="Annuler" icon="pi pi-times"
+                            class="p-button-secondary p-button-text p-button-sm" (click)="toggleEdit()"></button>
+                    </div>
+                </div>
+                <div class="flex justify-content-between align-items-center mb-4 pb-3 border-top-1 surface-border">
+                    <div class="text-xl font-bold text-gray-800">Détails Personnelles</div>
+                </div>
+                <ul class="list-none p-0 m-0">
+                    <li class="flex align-items-center py-3 px-3 list-item flex-wrap">
+                        <div class="text-500 w-6 md:w-3 font-medium"><i
+                                class="pi pi-hashtag mr-2 text-blue-500"></i>Matricule</div>
+                        <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
+                            {{agent?.user?.registrationNumber}}
+                        </div>
+                    </li>
+                    <li class="flex align-items-center py-3 px-3 list-item border-top-1 surface-border flex-wrap">
+                        <div class="text-500 w-6 md:w-3 font-medium"><i class="pi pi-user mr-2 text-blue-500"></i>Nom et
+                            Prénom</div>
+                        <div class="text-900 w-full md:w-9 md:flex-order-0 flex-order-1">
+                            <ng-container *ngIf="!isEditing">
+                                {{agent?.user?.firstName}} {{agent?.user?.lastName}}
+                            </ng-container>
+                            <ng-container *ngIf="isEditing">
+                                <div class="p-inputgroup">
+                                    <input pInputText placeholder="Prénom" [(ngModel)]="editedAgent.user.firstName"
+                                        class="mr-2">
+                                    <input pInputText placeholder="Nom" [(ngModel)]="editedAgent.user.lastName">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </li>
+                    <!--  <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
+                        <div class="text-500 w-6 md:w-2 font-medium">Sexe</div>
+                        <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1">
+                        {{agent?.gender}} 
+                        </div>
+                    </li> -->
+                    <li class="flex align-items-center py-3 px-3 list-item border-top-1 surface-border flex-wrap">
+                        <div class="text-500 w-6 md:w-3 font-medium"><i class="pi pi-id-card mr-2 text-blue-500"></i>CIN
+                        </div>
+                        <div class="text-900 w-full md:w-9 md:flex-order-0 flex-order-1">
+                            <ng-container *ngIf="!isEditing">
+                                {{agent?.user?.cin}}
+                            </ng-container>
+                            <ng-container *ngIf="isEditing">
+                                <input pInputText placeholder="CIN" [(ngModel)]="editedAgent.user.cin"
+                                    style="width: 100%;">
+                            </ng-container>
+                        </div>
+                    </li>
+                    <li class="flex align-items-center py-3 px-3 list-item border-top-1 surface-border flex-wrap">
+                        <div class="text-500 w-6 md:w-3 font-medium"><i
+                                class="pi pi-calendar mr-2 text-blue-500"></i>Date de Naissance</div>
+                        <div class="text-900 w-full md:w-9 md:flex-order-0 flex-order-1">
+                            <ng-container *ngIf="!isEditing">
+                                {{agent?.user?.birthDate}}
+                            </ng-container>
+                            <ng-container *ngIf="isEditing">
+                                <input type="date" pInputText [(ngModel)]="editedAgent.user.birthDate"
+                                    style="width: 100%;">
+                            </ng-container>
+                        </div>
+                    </li>
+                    <!-- <li class="flex align-items-center py-3 px-2 border-top-1 surface-border flex-wrap">
+                        <div class="text-500 w-6 md:w-2 font-medium">E-mail</div>
+                        <div class="text-900 w-full md:w-8 md:flex-order-0 flex-order-1"> 
+                        {{agent?.email}}
+                        </div>
+                        <div class="w-6 md:w-2 flex justify-content-end">
+                            <a href="mailto:" pButton pRipple icon="pi pi-send" class="p-button-rounded p-button-secondary p-button-outlined mr-2 mb-2"></a>
+                        </div>
+                    </li> -->
+
+                </ul>
+            </div>
+        </div>
+        <div>
+            <app-password-reset></app-password-reset>
+        </div>
+    </div>
+
+    <div class="col-12 lg:col-4">
+        <div pRipple class="mb-4">
+            <div class="px-4 py-5 shadow-4 flex flex-column align-items-center justify-content-center"
+                [ngStyle]="{borderRadius: '1rem', background: 'linear-gradient(to bottom, #60a5fa 0%, #2483f7 100%)'}">
+                <div class="text-center w-full flex flex-column align-items-center">
+                    <img src="assets/images/default-avatar.png" alt="Avatar"
+                        class="w-8rem h-8rem border-circle mb-3 border-2 border-white shadow-2"
+                        (error)="handleImageError($event)">
+                    <div class="text-white font-semibold text-xl capitalize">{{agent?.user?.firstName}} {{agent?.user?.lastName}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="flex justify-content-between mb-3">
+                <div>
+                    <span class="block text-500 font-medium mb-3">Poste</span>
+                    <div class="text-900 font-normal text-2xl">
+                        {{agent?.user?.position?.name}}
+                    </div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
+                    [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+                    <i class="pi pi-shield text-blue-500  text-xl"></i>
+                </div>
+            </div>
+
+        </div>
+        <div class="card">
+            <div class="flex justify-content-between mb-3">
+                <div>
+                    <span class="block text-500 font-medium mb-3">Fonction</span>
+                    <div class="text-900 font-normal text-2xl">
+                        {{agent?.user?.job?.title}}
+
+                    </div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-green-100 border-round"
+                    [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+                    <i class="pi pi-id-card text-green-500  text-xl"></i>
+                </div>
+            </div>
+
+        </div>
+        <div class="card">
+            <div class="flex justify-content-between mb-3">
+                <div>
+                    <span class="block text-500 font-medium mb-3">PORT</span>
+                    <div class="text-900 font-normal text-2xl">
+                        {{agent?.user?.harbor?.title}}
+
+                    </div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-orange-100 border-round"
+                    [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+                    <i class="pi pi-map-marker text-orange-500 text-xl"></i>
+                </div>
+            </div>
+            <!-- maybe a map here -->
+            <div class="text-500"></div>
+        </div>
+
+    </div>
+</div>
