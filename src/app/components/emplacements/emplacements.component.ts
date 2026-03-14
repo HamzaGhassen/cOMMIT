@@ -502,144 +502,143 @@ export class EmplacementsComponent implements OnInit, OnDestroy {
     this.newEpiMetragePerBloc = 10;
   }
 zz
-addEpi(): void {
-  if (!this.newEpiTraversCount || !this.newEpiTablettesPerTravers ||
-      !this.newEpiBlocsPerTablette || !this.newEpiMetragePerBloc) {
-    this.messageService.add({
-      severity: 'warn',
-      summary: 'Attention',
-      detail: 'Veuillez remplir tous les champs obligatoires',
-      life: 3000
-    });
-    return;
-  }
+  addEpi(): void {
+    if (!this.newEpiTraversCount || !this.newEpiTablettesPerTravers ||
+        !this.newEpiBlocsPerTablette || !this.newEpiMetragePerBloc) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Attention',
+        detail: 'Veuillez remplir tous les champs obligatoires',
+        life: 3000
+      });
+      return;
+    }
 
-  if (this.newEpiBlocsPerTablette > 8) {
-    this.messageService.add({
-      severity: 'warn',
-      summary: 'Attention',
-      detail: 'Le nombre de blocs par tablette ne peut pas depasser 8',
-      life: 5000
-    });
-    return;
-  }
+    if (this.newEpiBlocsPerTablette > 8) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Attention',
+        detail: 'Le nombre de blocs par tablette ne peut pas depasser 8',
+        life: 5000
+      });
+      return;
+    }
 
-  const epiNum = this.getNextEpiNum();
-  const epiNumero = `${epiNum}000`;
+    // Auto-generate epi numero: scan max existing to avoid collisions
+    const epiNum = this.getNextEpiNum();
+    const epiNumero = `${epiNum}000`;
 
-  // Calcul automatique des métrages
-  const tabMetrage = this.newEpiBlocsPerTablette * (this.newEpiMetragePerBloc ?? 0);
-  const traversMetrage = this.newEpiTablettesPerTravers * tabMetrage;
-  const epiMetrage = this.newEpiTraversCount * traversMetrage;
+    const epie: Emplacement = {
+      numero: epiNumero,
+      type: TypeEmp.EPIE,
+      metrage: 0
+    };
 
-  const epie: Emplacement = {
-    numero: epiNumero,
-    type: TypeEmp.EPIE,
-    metrage: epiMetrage
-  };
+    this.loading = true;
+    this.subscriptions.push(
+      this.emplacementService.createRoot(epie).subscribe({
+        next: (createdEpie) => {
+          // Step 1: Create travers
+          const traversRequests = Array.from(
+            { length: this.newEpiTraversCount }, (_, i) =>
+            this.emplacementService.createChild(createdEpie.id!, {
+              numero: `${epiNum}${i + 1}00`,
+              type: TypeEmp.TRAVERS,
+              metrage: 0
+            })
+          );
 
-  this.loading = true;
-  this.subscriptions.push(
-    this.emplacementService.createRoot(epie).subscribe({
-      next: (createdEpie) => {
-        const traversRequests = Array.from(
-          { length: this.newEpiTraversCount }, (_, i) =>
-          this.emplacementService.createChild(createdEpie.id!, {
-            numero: `${epiNum}${i + 1}00`,
-            type: TypeEmp.TRAVERS,
-            metrage: traversMetrage
-          })
-        );
+          forkJoin(traversRequests).subscribe({
+            next: (createdTravers) => {
+              // Step 2: Create tablettes (per-travers numbering, 1-9)
+              const tabletteRequests: Observable<Emplacement>[] = [];
+              const tabletteTraversIndices: { traversIdx: number; tabIdx: number }[] = [];
 
-        forkJoin(traversRequests).subscribe({
-          next: (createdTravers) => {
-            const tabletteRequests: Observable<Emplacement>[] = [];
-            const tabletteTraversIndices: { traversIdx: number; tabIdx: number }[] = [];
-
-            createdTravers.forEach((trav, traversIdx) => {
-              for (let t = 1; t <= this.newEpiTablettesPerTravers; t++) {
-                const tabNumero = `${epiNum}${traversIdx + 1}${t}0`;
-                tabletteRequests.push(
-                  this.emplacementService.createChild(trav.id!, {
-                    numero: tabNumero,
-                    type: TypeEmp.TABLETTE,
-                    metrage: tabMetrage
-                  })
-                );
-                tabletteTraversIndices.push({ traversIdx: traversIdx + 1, tabIdx: t });
-              }
-            });
-
-            forkJoin(tabletteRequests).subscribe({
-              next: (createdTablettes) => {
-                const blocRequests: Observable<Emplacement>[] = [];
-
-                createdTablettes.forEach((tab, idx) => {
-                  const { traversIdx, tabIdx } = tabletteTraversIndices[idx];
-                  for (let b = 1; b <= this.newEpiBlocsPerTablette; b++) {
-                    const blocNumero = `${epiNum}${traversIdx}${tabIdx}${b}`;
-                    blocRequests.push(
-                      this.emplacementService.createChild(tab.id!, {
-                        numero: blocNumero,
-                        type: TypeEmp.BLOC,
-                        metrage: this.newEpiMetragePerBloc ?? 0
-                      })
-                    );
-                  }
-                });
-
-                if (blocRequests.length === 0) {
-                  this.finishEpiCreation();
-                  return;
+              createdTravers.forEach((trav, traversIdx) => {
+                for (let t = 1; t <= this.newEpiTablettesPerTravers; t++) {
+                  const tabNumero = `${epiNum}${traversIdx + 1}${t}0`;
+                  tabletteRequests.push(
+                    this.emplacementService.createChild(trav.id!, {
+                      numero: tabNumero,
+                      type: TypeEmp.TABLETTE,
+                      metrage: 0
+                    })
+                  );
+                  tabletteTraversIndices.push({ traversIdx: traversIdx + 1, tabIdx: t });
                 }
+              });
 
-                forkJoin(blocRequests).subscribe({
-                  next: () => this.finishEpiCreation(),
-                  error: () => {
-                    this.loading = false;
-                    this.messageService.add({
-                      severity: 'error',
-                      summary: 'Erreur',
-                      detail: 'Erreur lors de la creation des blocs',
-                      life: 5000
-                    });
+              forkJoin(tabletteRequests).subscribe({
+                next: (createdTablettes) => {
+                  // Step 3: Create blocs under each tablette
+                  const blocRequests: Observable<Emplacement>[] = [];
+
+                  createdTablettes.forEach((tab, idx) => {
+                    const { traversIdx, tabIdx } = tabletteTraversIndices[idx];
+                    for (let b = 1; b <= this.newEpiBlocsPerTablette; b++) {
+                      const blocNumero = `${epiNum}${traversIdx}${tabIdx}${b}`;
+                      blocRequests.push(
+                        this.emplacementService.createChild(tab.id!, {
+                          numero: blocNumero,
+                          type: TypeEmp.BLOC,
+                          metrage: this.newEpiMetragePerBloc ?? 0
+                        })
+                      );
+                    }
+                  });
+
+                  if (blocRequests.length === 0) {
+                    this.finishEpiCreation();
+                    return;
                   }
-                });
-              },
-              error: () => {
-                this.loading = false;
-                this.messageService.add({
-                  severity: 'error',
-                  summary: 'Erreur',
-                  detail: 'Erreur lors de la creation des tablettes',
-                  life: 5000
-                });
-              }
-            });
-          },
-          error: () => {
-            this.loading = false;
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erreur',
-              detail: 'Erreur lors de la creation des travers',
-              life: 5000
-            });
-          }
-        });
-      },
-      error: () => {
-        this.loading = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: "Erreur lors de la creation de l'epi",
-          life: 5000
-        });
-      }
-    })
-  );
-}
+
+                  forkJoin(blocRequests).subscribe({
+                    next: () => this.finishEpiCreation(),
+                    error: () => {
+                      this.loading = false;
+                      this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erreur',
+                        detail: 'Erreur lors de la creation des blocs',
+                        life: 5000
+                      });
+                    }
+                  });
+                },
+                error: () => {
+                  this.loading = false;
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erreur',
+                    detail: 'Erreur lors de la creation des tablettes',
+                    life: 5000
+                  });
+                }
+              });
+            },
+            error: () => {
+              this.loading = false;
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Erreur',
+                detail: 'Erreur lors de la creation des travers',
+                life: 5000
+              });
+            }
+          });
+        },
+        error: () => {
+          this.loading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: "Erreur lors de la creation de l'epi",
+            life: 5000
+          });
+        }
+      })
+    );
+  }
 
   private finishEpiCreation(): void {
     this.loading = false;
